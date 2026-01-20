@@ -6,122 +6,71 @@
     <title>EMMI_1.exe</title>
     <style>
         * { box-sizing: border-box; }
-        body { 
-            background-color: #000; 
-            color: #d4d4d4; 
-            font-family: 'Consolas', 'Monaco', monospace; 
-            margin: 0; 
-            padding: 20px; 
-            height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            font-size: 16px;
-        }
-
-        /* The Main Container */
-        .container {
-            border: 2px solid #333;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            background: #111;
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
-        }
-
-        /* Header Bar */
-        .header {
-            background: #333;
-            color: #fff;
-            padding: 10px;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .status-dot {
-            height: 10px; width: 10px;
-            background-color: #0f0;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 5px;
-            box-shadow: 0 0 5px #0f0;
-        }
-
-        /* Chat Area */
-        #chat-log {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 20px;
-            white-space: pre-wrap;
-        }
-
-        .msg { margin-bottom: 15px; max-width: 90%; }
-        .msg.user { color: #fff; opacity: 0.7; }
-        .msg.emmi { color: #ff0055; font-weight: bold; border-left: 2px solid #ff0055; padding-left: 10px; }
-        .msg.error { color: #f00; background: #220000; padding: 5px; }
-
-        /* Input Area */
-        .input-area {
-            border-top: 1px solid #333;
-            padding: 10px;
-            background: #000;
-            display: flex;
-        }
-
-        input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-family: inherit;
-            font-size: 1.1em;
-            outline: none;
-        }
-
-        /* Scanline effect */
-        body::after {
-            content: "";
-            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1), rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px);
-            pointer-events: none;
-        }
+        body { background: #000; color: #d4d4d4; font-family: 'Consolas', monospace; margin: 0; padding: 20px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        .container { border: 2px solid #333; height: 100%; display: flex; flex-direction: column; background: #111; position: relative; }
+        .header { background: #222; padding: 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
+        
+        /* Mood Bar */
+        .mood-container { width: 150px; height: 10px; background: #333; border-radius: 5px; overflow: hidden; }
+        #mood-bar { height: 100%; width: 50%; background: #ff0055; transition: width 0.5s ease, background 0.5s ease; }
+        
+        #chat-log { flex-grow: 1; overflow-y: auto; padding: 20px; }
+        .msg { margin-bottom: 15px; }
+        .msg.user { color: #888; }
+        .msg.emmi { color: #ff0055; font-weight: bold; }
+        .msg.error { color: #f00; font-size: 0.8em; }
+        
+        .input-area { border-top: 1px solid #333; padding: 15px; background: #000; display: flex; }
+        input { width: 100%; background: transparent; border: none; color: #fff; font-family: inherit; outline: none; font-size: 1.1em; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <span>EMMI_1 [BUILD 2024.UNKNOWN]</span>
-            <div style="font-size: 0.8em;"><span class="status-dot"></span>ONLINE</div>
+            <span>EMMI_CORE [BETA]</span>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 0.7em; color: #666;">MOOD:</span>
+                <div class="mood-container"><div id="mood-bar"></div></div>
+            </div>
         </div>
-        
         <div id="chat-log">
-            <div class="msg emmi">Emmi: *yawns* uhh... system start? i guess.</div>
+            <div class="msg emmi">Emmi: *shrugs* idk... i'm here.</div>
         </div>
-        
         <div class="input-area">
             <span style="color: #444; margin-right: 10px;">>></span>
-            <input type="text" id="input" placeholder="type here..." autocomplete="off" autofocus>
+            <input type="text" id="input" placeholder="say something..." autocomplete="off" autofocus>
         </div>
     </div>
 
     <script>
         const chat = document.getElementById('chat-log');
         const inp = document.getElementById('input');
+        const moodBar = document.getElementById('mood-bar');
         let mood = 50;
+
+        function updateMoodUI() {
+            moodBar.style.width = mood + "%";
+            if (mood < 30) moodBar.style.background = "#ff4444";
+            else if (mood > 70) moodBar.style.background = "#00ff66";
+            else moodBar.style.background = "#ff0055";
+        }
 
         inp.addEventListener('keydown', async (e) => {
             if (e.key === 'Enter' && inp.value.trim()) {
                 const text = inp.value;
-                inp.value = ''; // Clear input immediately
+                const lowerText = text.toLowerCase();
+                inp.value = '';
                 addMsg('user', "You: " + text);
 
-                // Simple Mood Logic
-                if (text.length > 40) mood -= 15; // She hates reading long text
-                else mood += 5;
-                if (mood < 0) mood = 0; if (mood > 100) mood = 100;
+                // Emotion Detection Logic
+                const mean = ['stupid', 'dumb', 'bitch', 'shut up', 'hate', 'fucker', 'mid', 'cap'];
+                const nice = ['sorry', 'love', 'nice', 'cool', 'friend', 'happy', 'pog'];
 
-                addMsg('emmi', "Emmi: ..."); // Loading indicator
+                if (mean.some(w => lowerText.includes(w))) mood -= 20;
+                else if (nice.some(w => lowerText.includes(w))) mood += 10;
+                
+                mood = Math.max(0, Math.min(100, mood));
+                updateMoodUI();
 
                 try {
                     const req = await fetch('/api/brain', {
@@ -129,21 +78,10 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ prompt: text, mood: mood })
                     });
-                    
                     const data = await req.json();
-                    
-                    // Remove loading "..."
-                    chat.lastElementChild.remove();
-                    
-                    if (req.status !== 200) {
-                        addMsg('error', "ERROR: " + data.text);
-                    } else {
-                        addMsg('emmi', "Emmi: " + data.text);
-                    }
-
+                    addMsg('emmi', "Emmi: " + data.text);
                 } catch (err) {
-                    chat.lastElementChild.remove();
-                    addMsg('error', "CRITICAL: " + err.message);
+                    addMsg('error', "CRITICAL: Brain disconnected.");
                 }
             }
         });
