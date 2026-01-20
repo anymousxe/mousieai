@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emmi 1</title>
+    <style>
+        body { background-color: #050505; color: #e0e0e0; font-family: 'Courier New', monospace; margin: 0; padding: 20px; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; }
+        h1 { color: #ff0055; font-size: 1.2rem; margin-bottom: 10px; text-transform: lowercase; }
+        #chat-box { flex-grow: 1; overflow-y: auto; border: 1px solid #333; padding: 15px; margin-bottom: 15px; border-radius: 4px; background: #0a0a0a; }
+        .msg { margin-bottom: 12px; line-height: 1.4; }
+        .user { color: #888; }
+        .emmi { color: #ff0055; font-weight: bold; }
+        input { background: #111; border: 1px solid #333; color: #fff; padding: 12px; font-family: inherit; border-radius: 4px; outline: none; }
+        input:focus { border-color: #ff0055; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>emmi 1 (v.2024-lim)</h1>
+    <div id="chat-box">
+        <div class="msg emmi">Emmi: wait... what year is it? 2024 right? ugh my head hurts.</div>
+    </div>
+    <input type="text" id="input" placeholder="say something..." autocomplete="off" autofocus>
+
+    <script>
+        const chat = document.getElementById('chat-box');
+        const inp = document.getElementById('input');
+        let mood = 50; // 0 = sad/slow, 100 = hyper/happy
+
+        function addMsg(role, text) {
+            chat.innerHTML += `<div class="msg ${role}">${role === 'user' ? 'You' : 'Emmi'}: ${text}</div>`;
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        inp.addEventListener('keydown', async (e) => {
+            if (e.key === 'Enter' && inp.value.trim()) {
+                const text = inp.value;
+                inp.value = '';
+                addMsg('user', text);
+
+                // Simple mood logic: Long messages bore her (lower mood), short ones keep her attention
+                if (text.length > 50) mood -= 10; 
+                else mood += 5;
+                if (mood > 100) mood = 100;
+                if (mood < 0) mood = 0;
+
+                try {
+                    const req = await fetch('/api/brain', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: text, mood: mood })
+                    });
+                    const res = await req.json();
+                    addMsg('emmi', res.text);
+                } catch (err) {
+                    addMsg('emmi', "idk what happened... i lagged out.");
+                }
+            }
+        });
+    </script>
+</body>
+</html>
