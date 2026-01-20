@@ -1,13 +1,11 @@
 {
   "name": "emmi-1",
-  "version": "1.0.0",
+  "version": "2.0.0",
+  "description": "Emmi 1 - The Dumb AI",
   "scripts": {
     "start": "node api/brain.js"
   },
-  "dependencies": {
-    "node-fetch": "^3.3.2"
-  },
   "engines": {
-    "node": "22.x" 
+    "node": "24.x"
   }
 }
