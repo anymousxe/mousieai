@@ -1,0 +1,14 @@
+{
+  "name": "emmi-1",
+  "version": "1.0.0",
+  "description": "A dumb AI that simulates emotion",
+  "scripts": {
+    "start": "node api/brain.js"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
